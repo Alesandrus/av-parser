@@ -30,7 +30,7 @@ import java.util.List;
 @Component
 public class DmitryCompanyWatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(DmitryCompanyWatcher.class);
-    private static final String DMITRY_HTTP_PATH = "https://www.avito.ru/user/f20b2dd57349fd96815bbdc7f581308b/profile?id=810817888&src=item";
+    private static final String DMITRY_HTTP_PATH = "https://www.avito.ru/user/035a3d92e035ed50e9e1283b0aac6031/profile?id=1247568718&src=item";
     private static final String avitoRoot = "https://www.avito.ru";
     private static final String PHANTOMJS_ENV = "PHANTOMJS";
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
