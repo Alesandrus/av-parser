@@ -10,7 +10,7 @@ import java.sql.Timestamp;
  * @since 13.01.2019
  */
 @Entity
-public class Advertisement {
+public class DmitryAdvertisement {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

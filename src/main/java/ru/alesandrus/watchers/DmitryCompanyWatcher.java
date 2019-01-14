@@ -13,18 +13,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.alesandrus.models.Advertisement;
+import ru.alesandrus.models.DmitryAdvertisement;
 import ru.alesandrus.repositories.AdvertismentRepository;
 
-import javax.script.ScriptException;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,16 +30,17 @@ import java.util.List;
 @Component
 public class DmitryCompanyWatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(DmitryCompanyWatcher.class);
-    private static final String DMITRY_HTTP_PATH = "https://www.avito.ru/user/035a3d92e035ed50e9e1283b0aac6031/profile?id=1247568718&src=item";
+    private static final String DMITRY_HTTP_PATH = "https://www.avito.ru/user/f20b2dd57349fd96815bbdc7f581308b/profile?id=810817888&src=item";
     private static final String avitoRoot = "https://www.avito.ru";
     private static final String PHANTOMJS_ENV = "PHANTOMJS";
+    private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
 
 
     @Autowired
     private AdvertismentRepository advertismentRepository;
 
     //    @Scheduled(cron = "0 0/30 7-23 * * *")
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 120000)
     public void parseDmitryMainPage() {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setJavascriptEnabled(true);
@@ -53,19 +49,37 @@ public class DmitryCompanyWatcher {
         WebDriver driver = new PhantomJSDriver(caps);
         driver.get(DMITRY_HTTP_PATH);
         scrollDown(driver, "//div[@class=\"js-footer\"]");
-
         By by = By.xpath("//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a");
         List<WebElement> webElements = driver.findElements(by);
+        int size;
+        do {
+            size = webElements.size();
+            scrollDown(driver, "//div[@class=\"js-footer\"]");
+            webElements = driver.findElements(by);
+        } while (size != webElements.size());
 
-        List<Advertisement> updatedAds = new ArrayList<>();
+        List<DmitryAdvertisement> updatedAds = new ArrayList<>();
         for (WebElement element : webElements) {
-            Advertisement ad = getAd(element);
-            //если обяъвление обновлено, то добавить в updatedAds
+            DmitryAdvertisement curAd = getAd(element);
+            checkAd(curAd, updatedAds);
         }
-
-        //если updatedAds не пустой, то отправить email со списком новых объявлений
-
+        if (!updatedAds.isEmpty()) {
+            //отправить email со списком новых объявлений
+        }
         driver.quit();
+    }
+
+    public void checkAd(DmitryAdvertisement curAd, List<DmitryAdvertisement> updatedList) {
+        DmitryAdvertisement oldAd = advertismentRepository.findByUrl(curAd.getUrl()).orElse(null);
+        if (oldAd != null && curAd.getLastUpdateTime().after(oldAd.getLastUpdateTime())) {
+            oldAd.setLastUpdateTime(curAd.getLastUpdateTime());
+            advertismentRepository.save(oldAd);
+            updatedList.add(oldAd);
+        } else if (oldAd == null){
+            curAd.setCreateTime(curAd.getLastUpdateTime());
+            advertismentRepository.save(curAd);
+            updatedList.add(curAd);
+        }
     }
 
     public void scrollDown(WebDriver webDriver, String xpath) {
@@ -77,24 +91,25 @@ public class DmitryCompanyWatcher {
         } catch (InterruptedException e) {
             LOGGER.error("Thread is interrupted {}", e.getMessage());
         }
+
     }
 
-    public Advertisement getAd(WebElement webElement) {
+    public DmitryAdvertisement getAd(WebElement webElement) {
         String url = webElement.getAttribute("href");
         String[] adAttrs = webElement.getText().split("\n");
         String name = adAttrs[0];
         String price = adAttrs[1].replaceAll("\\D", "");
-        //Timestamp date = getDate(adAttrs[2]);
-        Advertisement advertisement = new Advertisement();
+        Timestamp date = getTimeStampFromLocaleDateTime(getDate(adAttrs[2]));
+        DmitryAdvertisement advertisement = new DmitryAdvertisement();
         advertisement.setUrl(url);
         advertisement.setName(name);
         advertisement.setPrice(new BigInteger(price));
-        //advertisement.setLastUpdateTime(date);
+        advertisement.setLastUpdateTime(date);
         return advertisement;
     }
 
 
-    public static void main(String[] args) throws IOException, ScriptException, NoSuchMethodException, InterruptedException {
+    /*public static void main(String[] args) throws IOException, ScriptException, NoSuchMethodException, InterruptedException {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setJavascriptEnabled(true);
         final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
@@ -126,9 +141,9 @@ public class DmitryCompanyWatcher {
         }
         System.out.println(elements.size() );
         driver.quit();
-    }
+    }*/
 
-    public static LocalDateTime getDate(String str) {
+    public LocalDateTime getDate(String str) {
         LocalDateTime date;
         String[] arr = str.split("\\s|:");
         if(str.contains("Сегодня")) {
@@ -145,7 +160,7 @@ public class DmitryCompanyWatcher {
         return date;
     }
 
-    public static int parseMonth(String s) {
+    public int parseMonth(String s) {
         switch (s) {
             case "января" : return 1;
             case "февраля" : return 2;
@@ -161,5 +176,10 @@ public class DmitryCompanyWatcher {
             case "декабря" : return 12;
         }
         return -1;
+    }
+
+    public Timestamp getTimeStampFromLocaleDateTime(LocalDateTime localDateTime) {
+        ZonedDateTime zonedDateTime = localDateTime.atZone(zoneId);
+        return new Timestamp(zonedDateTime.toInstant().toEpochMilli());
     }
 }
