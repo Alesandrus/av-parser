@@ -10,6 +10,6 @@ import java.util.Optional;
  * @version 1.0
  * @since 13.01.2019
  */
-public interface AdvertismentRepository extends CrudRepository<Advertisement, Long> {
+public interface AdvertisementRepository extends CrudRepository<Advertisement, Long> {
     Optional<Advertisement> findByUrl(String url);
 }

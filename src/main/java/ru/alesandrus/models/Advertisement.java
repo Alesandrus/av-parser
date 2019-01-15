@@ -12,7 +12,7 @@ import java.sql.Timestamp;
  * @since 13.01.2019
  */
 @Entity
-public class Advertisement {
+public class Advertisement implements Comparable<Advertisement> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -98,5 +98,10 @@ public class Advertisement {
 
     public void setOwner(AdOwner owner) {
         this.owner = owner;
+    }
+
+    @Override
+    public int compareTo(Advertisement other) {
+        return this.lastUpdateTime.compareTo(other.lastUpdateTime);
     }
 }
