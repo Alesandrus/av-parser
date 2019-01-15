@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.alesandrus.models.DmitryAdvertisement;
+import ru.alesandrus.models.Advertisement;
 import ru.alesandrus.repositories.AdvertismentRepository;
 
 import java.math.BigInteger;
@@ -58,9 +58,9 @@ public class DmitryCompanyWatcher {
             webElements = driver.findElements(by);
         } while (size != webElements.size());
 
-        List<DmitryAdvertisement> updatedAds = new ArrayList<>();
+        List<Advertisement> updatedAds = new ArrayList<>();
         for (WebElement element : webElements) {
-            DmitryAdvertisement curAd = getAd(element);
+            Advertisement curAd = getAd(element);
             checkAd(curAd, updatedAds);
         }
         if (!updatedAds.isEmpty()) {
@@ -69,8 +69,8 @@ public class DmitryCompanyWatcher {
         driver.quit();
     }
 
-    public void checkAd(DmitryAdvertisement curAd, List<DmitryAdvertisement> updatedList) {
-        DmitryAdvertisement oldAd = advertismentRepository.findByUrl(curAd.getUrl()).orElse(null);
+    public void checkAd(Advertisement curAd, List<Advertisement> updatedList) {
+        Advertisement oldAd = advertismentRepository.findByUrl(curAd.getUrl()).orElse(null);
         if (oldAd != null && curAd.getLastUpdateTime().after(oldAd.getLastUpdateTime())) {
             oldAd.setLastUpdateTime(curAd.getLastUpdateTime());
             advertismentRepository.save(oldAd);
@@ -94,13 +94,13 @@ public class DmitryCompanyWatcher {
 
     }
 
-    public DmitryAdvertisement getAd(WebElement webElement) {
+    public Advertisement getAd(WebElement webElement) {
         String url = webElement.getAttribute("href");
         String[] adAttrs = webElement.getText().split("\n");
         String name = adAttrs[0];
         String price = adAttrs[1].replaceAll("\\D", "");
         Timestamp date = getTimeStampFromLocaleDateTime(getDate(adAttrs[2]));
-        DmitryAdvertisement advertisement = new DmitryAdvertisement();
+        Advertisement advertisement = new Advertisement();
         advertisement.setUrl(url);
         advertisement.setName(name);
         advertisement.setPrice(new BigInteger(price));

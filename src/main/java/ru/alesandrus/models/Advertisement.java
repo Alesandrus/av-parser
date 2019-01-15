@@ -1,5 +1,7 @@
 package ru.alesandrus.models;
 
+import ru.alesandrus.models.enumerations.Category;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -10,7 +12,7 @@ import java.sql.Timestamp;
  * @since 13.01.2019
  */
 @Entity
-public class DmitryAdvertisement {
+public class Advertisement {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -25,6 +27,14 @@ public class DmitryAdvertisement {
 
     @Column(unique = true)
     private String url;
+
+    @Enumerated(value = EnumType.STRING)
+//    @Column(nullable = false)
+    private Category category;
+
+    @ManyToOne
+//    @JoinColumn(name = "owner_id", nullable = false)
+    private AdOwner owner;
 
     public Long getId() {
         return id;
@@ -72,5 +82,21 @@ public class DmitryAdvertisement {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public AdOwner getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AdOwner owner) {
+        this.owner = owner;
     }
 }

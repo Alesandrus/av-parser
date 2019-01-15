@@ -1,7 +1,7 @@
 package ru.alesandrus.repositories;
 
 import org.springframework.data.repository.CrudRepository;
-import ru.alesandrus.models.DmitryAdvertisement;
+import ru.alesandrus.models.Advertisement;
 
 import java.util.Optional;
 
@@ -10,6 +10,6 @@ import java.util.Optional;
  * @version 1.0
  * @since 13.01.2019
  */
-public interface AdvertismentRepository extends CrudRepository<DmitryAdvertisement, Long> {
-    Optional<DmitryAdvertisement> findByUrl(String url);
+public interface AdvertismentRepository extends CrudRepository<Advertisement, Long> {
+    Optional<Advertisement> findByUrl(String url);
 }
