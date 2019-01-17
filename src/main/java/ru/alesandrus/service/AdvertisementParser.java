@@ -101,7 +101,6 @@ public class AdvertisementParser {
         } catch (InterruptedException e) {
             LOGGER.error("Thread is interrupted {}", e.getMessage());
         }
-
     }
 
     private Advertisement getAdFromWebElement(WebElement webElement) {

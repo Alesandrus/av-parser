@@ -5,13 +5,13 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import ru.alesandrus.models.Advertisement;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,22 +22,26 @@ import java.util.Map;
  */
 @Component
 public class ExcelCreator {
-    public void createReport(Map<String, List<Advertisement>> ads, String fileName) {
-        /*if (ads.isEmpty()) {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExcelCreator.class);
+
+    public void createReport(Map<String, List<Advertisement>> updatedAds, String fileName) {
+        if (updatedAds.isEmpty()) {
+            LOGGER.error("Ads are empty");
             throw new IllegalArgumentException("Ads should not be empty");
-        }*/
+        }
 
         try (Workbook workbook = new HSSFWorkbook();
-             FileOutputStream fileOut = new FileOutputStream(fileName)){
+             FileOutputStream fileOut = new FileOutputStream(fileName)) {
             Sheet sheet = workbook.createSheet("Обновленные объявления");
-            titleCreate(sheet);
+            createTitle(sheet);
+            fillReport(updatedAds, sheet);
             workbook.write(fileOut);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 
-    private void titleCreate(Sheet sheet) {
+    private void createTitle(Sheet sheet) {
         Row row = sheet.createRow(0);
         Cell number = row.createCell(0);
         number.setCellValue("№ п/п");
@@ -55,8 +59,33 @@ public class ExcelCreator {
         url.setCellValue("Ссылка на объявление");
     }
 
-    public static void main(String[] args) {
-        ExcelCreator creator = new ExcelCreator();
-        creator.createReport(new HashMap<>(), "D:/Users/Public/Window/TFS/test.xls");
+    private void fillReport(Map<String, List<Advertisement>> updatedAds, Sheet sheet) {
+        int rowNumber = 1;
+        for (Map.Entry<String, List<Advertisement>> ownerAds : updatedAds.entrySet()) {
+            String ownerName = ownerAds.getKey();
+            List<Advertisement> ads = ownerAds.getValue();
+            for (Advertisement ad : ads) {
+                createRow(sheet, rowNumber, ownerName, ad);
+                rowNumber++;
+            }
+        }
+    }
+
+    private void createRow(Sheet sheet, int rowNumber, String ownerName, Advertisement ad) {
+        Row row = sheet.createRow(rowNumber);
+        Cell number = row.createCell(0);
+        number.setCellValue(rowNumber);
+        Cell owner = row.createCell(1);
+        owner.setCellValue(ownerName);
+        Cell name = row.createCell(2);
+        name.setCellValue(ad.getName());
+        Cell price = row.createCell(3);
+        price.setCellValue(ad.getPrice().toString());
+        Cell updatedTime = row.createCell(4);
+        updatedTime.setCellValue(ad.getLastUpdateTime());
+        Cell category = row.createCell(5);
+        category.setCellValue(ad.getCategory().getName());
+        Cell url = row.createCell(6);
+        url.setCellValue(ad.getUrl());
     }
 }

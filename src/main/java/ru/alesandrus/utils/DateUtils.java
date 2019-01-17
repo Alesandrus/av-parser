@@ -2,9 +2,11 @@ package ru.alesandrus.utils;
 
 import java.sql.Timestamp;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 public class DateUtils {
     private static final ZoneId zoneId = ZoneId.of("Europe/Moscow");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy_HH-mm");
 
     public static Timestamp conertToTimestamp(String date) {
         LocalDateTime localDateTime = getDate(date);
@@ -45,5 +47,10 @@ public class DateUtils {
             case "декабря" : return 12;
         }
         return -1;
+    }
+
+    public static String getCurrentTime() {
+        LocalDateTime localDateTime = LocalDateTime.now(zoneId);
+        return localDateTime.format(FORMATTER);
     }
 }

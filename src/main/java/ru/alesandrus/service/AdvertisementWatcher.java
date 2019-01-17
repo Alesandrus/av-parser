@@ -1,10 +1,14 @@
 package ru.alesandrus.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.alesandrus.models.Advertisement;
+import ru.alesandrus.utils.DateUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -14,12 +18,15 @@ import java.util.*;
  */
 @Component
 public class AdvertisementWatcher {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementWatcher.class);
+    private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     private static Map<String, String> rivals = new HashMap<>();
     static {
         rivals.put("Dmitry", "https://www.avito.ru/user/035a3d92e035ed50e9e1283b0aac6031/profile?id=1247568718&src=item");
     }
 
     private AdvertisementParser advertisementParser;
+    private ExcelCreator excelCreator;
     private AdvertisementSender advertisementSender;
 
     @Autowired
@@ -30,6 +37,11 @@ public class AdvertisementWatcher {
     @Autowired
     public void setAdvertisementSender(AdvertisementSender advertisementSender) {
         this.advertisementSender = advertisementSender;
+    }
+
+    @Autowired
+    public void setExcelCreator(ExcelCreator excelCreator) {
+        this.excelCreator = excelCreator;
     }
 
     //    @Scheduled(cron = "0 0/30 7-23 * * *")
@@ -44,6 +56,9 @@ public class AdvertisementWatcher {
             }
         }
         if (!adsForSending.isEmpty()) {
+            String pathToTemp = String.format("%s/report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), DateUtils.getCurrentTime());
+            excelCreator.createReport(adsForSending, pathToTemp);
+            advertisementSender.sendReport(pathToTemp);
             //отправить email со списком новых объявлений
         }
     }
