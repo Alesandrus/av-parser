@@ -56,8 +56,10 @@ public class AdvertisementWatcher {
         Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
         for (AdOwner adOwner : adOwners) {
             List<Advertisement> updatedAds = new ArrayList<>();
-            if (adOwner.getOwnerType() == OwnerType.COMPANY) {
-                updatedAds = advertisementParser.parsePageAndGetUpdatedAds(adOwner);
+            if (adOwner.isActive()) {
+                if (adOwner.getOwnerType() == OwnerType.COMPANY) {
+                    updatedAds = advertisementParser.parsePageAndGetUpdatedAds(adOwner);
+                }
             }
             if (!updatedAds.isEmpty()) {
                 Collections.sort(updatedAds);
@@ -66,7 +68,7 @@ public class AdvertisementWatcher {
         }
         if (!adsForSending.isEmpty()) {
             String creationTime = DateUtils.getCurrentTime();
-            String pathToTemp = String.format("%s/report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
+            String pathToTemp = String.format("%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
             advertisementSender.sendReport(pathToTemp, creationTime);
         }

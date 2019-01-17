@@ -25,8 +25,8 @@ public class AdvertisementSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementSender.class);
     private static final Properties properties;
     private static final String SEND_TO = "raulon7@mail.ru";
-    private static final String AVITO_PARSER_MAIL = "web@gmail.com";
-    private static final String PASSWORD = "1234";
+    private static final String AVITO_PARSER_MAIL = "scanavito@gmail.com";
+    private static final String PASSWORD = "realparser";
 
     static {
         properties = new Properties();
@@ -34,6 +34,7 @@ public class AdvertisementSender {
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", "smtp.gmail.com");
         properties.put("mail.smtp.port", "587");
+        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
     }
 
     public void sendReport(String filename, String creationTime) {
@@ -67,7 +68,7 @@ public class AdvertisementSender {
             messageBodyPart = new MimeBodyPart();
             DataSource source = new FileDataSource(filename);
             messageBodyPart.setDataHandler(new DataHandler(source));
-            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf(System.lineSeparator())));
+            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf("\\")) + 1);
             multipart.addBodyPart(messageBodyPart);
 
             // Send the complete message parts

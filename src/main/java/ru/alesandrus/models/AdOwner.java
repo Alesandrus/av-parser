@@ -11,7 +11,7 @@ import java.util.List;
  * @since 15.01.2019
  */
 @Entity
-public class AdOwner {
+public class AdOwner implements Comparable<AdOwner> {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "owner_id")
@@ -27,6 +27,8 @@ public class AdOwner {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private OwnerType ownerType;
+
+    private boolean active;
 
     @OneToMany(mappedBy = "owner")
     private List<Advertisement> ads;
@@ -77,5 +79,18 @@ public class AdOwner {
 
     public void setOwnerType(OwnerType ownerType) {
         this.ownerType = ownerType;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    @Override
+    public int compareTo(AdOwner o) {
+        return this.name.compareTo(o.name);
     }
 }

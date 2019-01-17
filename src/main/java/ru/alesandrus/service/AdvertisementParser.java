@@ -51,6 +51,7 @@ public class AdvertisementParser {
         caps.setJavascriptEnabled(true);
         final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
         caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + PHANTOMJS_EXE);
+        caps.setBrowserName("chrome");
         WebDriver driver = new PhantomJSDriver(caps);
         List<WebElement> webElements = getWebElements(owner.getUrl(), driver);
         List<Advertisement> updatedAds = getUpdatedAds(webElements, owner);
