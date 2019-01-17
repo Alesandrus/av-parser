@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.alesandrus.models.AdOwner;
 import ru.alesandrus.models.Advertisement;
+import ru.alesandrus.repositories.AdOwnerRepository;
 import ru.alesandrus.utils.DateUtils;
 
 import java.time.LocalDateTime;
@@ -20,14 +22,11 @@ import java.util.*;
 public class AdvertisementWatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementWatcher.class);
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-    private static Map<String, String> rivals = new HashMap<>();
-    static {
-        rivals.put("Dmitry", "https://www.avito.ru/user/035a3d92e035ed50e9e1283b0aac6031/profile?id=1247568718&src=item");
-    }
 
     private AdvertisementParser advertisementParser;
     private ExcelCreator excelCreator;
     private AdvertisementSender advertisementSender;
+    private AdOwnerRepository adOwnerRepository;
 
     @Autowired
     public void setAdvertisementParser(AdvertisementParser advertisementParser) {
@@ -44,22 +43,28 @@ public class AdvertisementWatcher {
         this.excelCreator = excelCreator;
     }
 
+    @Autowired
+    public void setAdOwnerRepository(AdOwnerRepository adOwnerRepository) {
+        this.adOwnerRepository = adOwnerRepository;
+    }
+
     //    @Scheduled(cron = "0 0/30 7-23 * * *")
     @Scheduled(fixedRate = 120000)
     public void watch() {
-        Map<String, List<Advertisement>> adsForSending = new TreeMap<>();
-        for (Map.Entry<String, String> ownerAds : rivals.entrySet()) {
-            List<Advertisement> updatedAds = advertisementParser.parsePageAndGetUpdatedAds(ownerAds.getValue());
+        Iterable<AdOwner> adOwners = adOwnerRepository.findAll();
+        Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
+        for (AdOwner adOwner : adOwners) {
+            List<Advertisement> updatedAds = advertisementParser.parsePageAndGetUpdatedAds(adOwner);
             if (!updatedAds.isEmpty()) {
                 Collections.sort(updatedAds);
-                adsForSending.put(ownerAds.getKey(), updatedAds);
+                adsForSending.put(adOwner, updatedAds);
             }
         }
         if (!adsForSending.isEmpty()) {
-            String pathToTemp = String.format("%s/report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), DateUtils.getCurrentTime());
+            String creationTime = DateUtils.getCurrentTime();
+            String pathToTemp = String.format("%s/report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
-            advertisementSender.sendReport(pathToTemp);
-            //отправить email со списком новых объявлений
+            advertisementSender.sendReport(pathToTemp, creationTime);
         }
     }
 

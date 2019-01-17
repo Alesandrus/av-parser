@@ -17,7 +17,7 @@ public class AdOwner {
 
     private String name;
 
-//    @Column(unique = true)
+    @Column(unique = true)
     private String url;
 
     private String contacts;

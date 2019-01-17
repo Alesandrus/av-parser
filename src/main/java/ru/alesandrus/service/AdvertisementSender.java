@@ -3,6 +3,7 @@ package ru.alesandrus.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.alesandrus.utils.DateUtils;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -22,45 +23,39 @@ import java.util.Properties;
 @Component
 public class AdvertisementSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementSender.class);
+    private static final Properties properties;
+    private static final String SEND_TO = "raulon7@mail.ru";
+    private static final String AVITO_PARSER_MAIL = "web@gmail.com";
+    private static final String PASSWORD = "1234";
 
+    static {
+        properties = new Properties();
+        properties.put("mail.smtp.auth", "true");
+        properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.port", "587");
+    }
 
-    public void sendReport(String filename) {
-        // Recipient's email ID needs to be mentioned.
-        String to = "abcd@gmail.com";
-
-        // Sender's email ID needs to be mentioned
-        String from = "web@gmail.com";
-
-        // Assuming you are sending email from localhost
-        String host = "localhost";
-
-        // Get system properties
-        Properties properties = System.getProperties();
-
-        // Setup mail server
-        properties.setProperty("mail.smtp.host", host);
-
-        // Get the default Session object.
-        Session session = Session.getDefaultInstance(properties);
-
+    public void sendReport(String filename, String creationTime) {
+        Session session = getSession();
         try {
             // Create a default MimeMessage object.
             MimeMessage message = new MimeMessage(session);
 
             // Set From: header field of the header.
-            message.setFrom(new InternetAddress(from));
+            message.setFrom(new InternetAddress(AVITO_PARSER_MAIL));
 
             // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO,new InternetAddress(to));
+            message.addRecipient(Message.RecipientType.TO,new InternetAddress(SEND_TO));
 
             // Set Subject: header field
-            message.setSubject("This is the Subject Line!");
+            message.setSubject(String.format("Отчет за %s", creationTime));
 
             // Create the message part
             BodyPart messageBodyPart = new MimeBodyPart();
 
             // Fill the message
-            messageBodyPart.setText("This is message body");
+            messageBodyPart.setText("Отчет находится во вложении");
 
             // Create a multipar message
             Multipart multipart = new MimeMultipart();
@@ -72,7 +67,7 @@ public class AdvertisementSender {
             messageBodyPart = new MimeBodyPart();
             DataSource source = new FileDataSource(filename);
             messageBodyPart.setDataHandler(new DataHandler(source));
-            messageBodyPart.setFileName(filename);
+            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf(System.lineSeparator())));
             multipart.addBodyPart(messageBodyPart);
 
             // Send the complete message parts
@@ -80,9 +75,17 @@ public class AdvertisementSender {
 
             // Send message
             Transport.send(message);
-            System.out.println("Sent message successfully....");
+            LOGGER.info("Sent message successfully");
         } catch (MessagingException mex) {
             mex.printStackTrace();
         }
+    }
+
+    private Session getSession() {
+        return Session.getInstance(properties, new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(AVITO_PARSER_MAIL, PASSWORD);
+            }
+        });
     }
 }

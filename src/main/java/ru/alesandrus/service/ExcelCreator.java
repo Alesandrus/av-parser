@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import ru.alesandrus.models.AdOwner;
 import ru.alesandrus.models.Advertisement;
 
 import java.io.FileOutputStream;
@@ -24,7 +25,7 @@ import java.util.Map;
 public class ExcelCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelCreator.class);
 
-    public void createReport(Map<String, List<Advertisement>> updatedAds, String fileName) {
+    public void createReport(Map<AdOwner, List<Advertisement>> updatedAds, String fileName) {
         if (updatedAds.isEmpty()) {
             LOGGER.error("Ads are empty");
             throw new IllegalArgumentException("Ads should not be empty");
@@ -59,10 +60,10 @@ public class ExcelCreator {
         url.setCellValue("Ссылка на объявление");
     }
 
-    private void fillReport(Map<String, List<Advertisement>> updatedAds, Sheet sheet) {
+    private void fillReport(Map<AdOwner, List<Advertisement>> updatedAds, Sheet sheet) {
         int rowNumber = 1;
-        for (Map.Entry<String, List<Advertisement>> ownerAds : updatedAds.entrySet()) {
-            String ownerName = ownerAds.getKey();
+        for (Map.Entry<AdOwner, List<Advertisement>> ownerAds : updatedAds.entrySet()) {
+            String ownerName = ownerAds.getKey().getName();
             List<Advertisement> ads = ownerAds.getValue();
             for (Advertisement ad : ads) {
                 createRow(sheet, rowNumber, ownerName, ad);
