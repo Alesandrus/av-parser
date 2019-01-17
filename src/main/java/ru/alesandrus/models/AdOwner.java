@@ -1,5 +1,7 @@
 package ru.alesandrus.models;
 
+import ru.alesandrus.models.enumerations.OwnerType;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -21,6 +23,10 @@ public class AdOwner {
     private String url;
 
     private String contacts;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private OwnerType ownerType;
 
     @OneToMany(mappedBy = "owner")
     private List<Advertisement> ads;
@@ -63,5 +69,13 @@ public class AdOwner {
 
     public void setAds(List<Advertisement> ads) {
         this.ads = ads;
+    }
+
+    public OwnerType getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(OwnerType ownerType) {
+        this.ownerType = ownerType;
     }
 }

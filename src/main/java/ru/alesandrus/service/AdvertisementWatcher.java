@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.alesandrus.models.AdOwner;
 import ru.alesandrus.models.Advertisement;
+import ru.alesandrus.models.enumerations.OwnerType;
 import ru.alesandrus.repositories.AdOwnerRepository;
 import ru.alesandrus.utils.DateUtils;
 
@@ -54,7 +55,10 @@ public class AdvertisementWatcher {
         Iterable<AdOwner> adOwners = adOwnerRepository.findAll();
         Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
         for (AdOwner adOwner : adOwners) {
-            List<Advertisement> updatedAds = advertisementParser.parsePageAndGetUpdatedAds(adOwner);
+            List<Advertisement> updatedAds = new ArrayList<>();
+            if (adOwner.getOwnerType() == OwnerType.COMPANY) {
+                updatedAds = advertisementParser.parsePageAndGetUpdatedAds(adOwner);
+            }
             if (!updatedAds.isEmpty()) {
                 Collections.sort(updatedAds);
                 adsForSending.put(adOwner, updatedAds);

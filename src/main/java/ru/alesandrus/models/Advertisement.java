@@ -29,11 +29,11 @@ public class Advertisement implements Comparable<Advertisement> {
     private String url;
 
     @Enumerated(value = EnumType.STRING)
-//    @Column(nullable = false)
+    @Column(nullable = false)
     private Category category;
 
     @ManyToOne
-//    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     private AdOwner owner;
 
     public Long getId() {
