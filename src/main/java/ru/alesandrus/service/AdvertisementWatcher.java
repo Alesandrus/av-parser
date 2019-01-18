@@ -1,5 +1,9 @@
 package ru.alesandrus.service;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +15,7 @@ import ru.alesandrus.models.enumerations.OwnerType;
 import ru.alesandrus.repositories.AdOwnerRepository;
 import ru.alesandrus.utils.DateUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -49,8 +54,8 @@ public class AdvertisementWatcher {
         this.adOwnerRepository = adOwnerRepository;
     }
 
-    //    @Scheduled(cron = "0 0/30 7-23 * * *")
-    @Scheduled(fixedRate = 120000)
+    @Scheduled(cron = "0 0/30 7-23 * * *")
+//    @Scheduled(fixedRate = 100000)
     public void watch() {
         Iterable<AdOwner> adOwners = adOwnerRepository.findAll();
         Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
@@ -70,7 +75,7 @@ public class AdvertisementWatcher {
             String creationTime = DateUtils.getCurrentTime();
             String pathToTemp = String.format("%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
-            advertisementSender.sendReport(pathToTemp, creationTime);
+            //advertisementSender.sendReport(pathToTemp, creationTime);
         }
     }
 
@@ -111,4 +116,8 @@ public class AdvertisementWatcher {
         System.out.println(elements.size() );
         driver.quit();
     }*/
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+    }
 }
