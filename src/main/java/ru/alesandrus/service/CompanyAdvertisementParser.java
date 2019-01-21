@@ -18,7 +18,6 @@ import ru.alesandrus.models.enumerations.Category;
 import ru.alesandrus.repositories.AdvertisementRepository;
 import ru.alesandrus.utils.DateUtils;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -40,14 +39,7 @@ public class CompanyAdvertisementParser {
     private static final String PHANTOMJS_EXE = "/phantomjs.exe";
     private static final String EMPTY_STRING = "";
 
-    private AdvertisementRepository advertisementRepository;
-
-    @Autowired
-    public void setAdvertisementRepository(AdvertisementRepository advertisementRepository) {
-        this.advertisementRepository = advertisementRepository;
-    }
-
-    public List<Advertisement> parsePageAndGetUpdatedAds(AdOwner owner) {
+    public List<Advertisement> parsePageAndGetAds(AdOwner owner) {
         DesiredCapabilities caps = new DesiredCapabilities();
         caps.setJavascriptEnabled(true);
         final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
@@ -55,20 +47,21 @@ public class CompanyAdvertisementParser {
         caps.setBrowserName("chrome");
         WebDriver driver = new PhantomJSDriver(caps);
         List<WebElement> webElements = getWebElements(owner.getUrl(), driver);
-        List<Advertisement> updatedAds = getUpdatedAds(webElements, owner);
+        List<Advertisement> updatedAds = getAds(webElements, owner);
         driver.quit();
         return updatedAds;
     }
 
-    private List<Advertisement> getUpdatedAds(List<WebElement> webElements, AdOwner owner) {
-        List<Advertisement> updatedAds = new ArrayList<>();
+    private List<Advertisement> getAds(List<WebElement> webElements, AdOwner owner) {
+        List<Advertisement> ads = new ArrayList<>();
         for (WebElement element : webElements) {
-            Advertisement curAd = getAdFromWebElement(element, owner);
-            if (curAd != null) {
-                checkOrSaveAd(curAd, updatedAds);
+            Advertisement ad = getAdFromWebElement(element);
+            if (ad != null) {
+                ad.setOwner(owner);
+                ads.add(ad);
             }
         }
-        return updatedAds;
+        return ads;
     }
 
     private List<WebElement> getWebElements(String url, WebDriver driver) {
@@ -85,19 +78,6 @@ public class CompanyAdvertisementParser {
         return webElements;
     }
 
-    private void checkOrSaveAd(Advertisement curAd, List<Advertisement> updatedList) {
-        Advertisement oldAd = advertisementRepository.findByUrl(curAd.getUrl()).orElse(null);
-        if (oldAd != null && curAd.getLastUpdateTime().after(oldAd.getLastUpdateTime())) {
-            oldAd.setLastUpdateTime(curAd.getLastUpdateTime());
-            advertisementRepository.save(oldAd);
-            updatedList.add(oldAd);
-        } else if (oldAd == null) {
-            curAd.setCreateTime(curAd.getLastUpdateTime());
-            advertisementRepository.save(curAd);
-            updatedList.add(curAd);
-        }
-    }
-
     private void scrollDown(WebDriver webDriver, String xpath) {
         WebElement element = webDriver.findElement(By.xpath(xpath));
         Coordinates cors = ((Locatable) element).getCoordinates();
@@ -109,7 +89,7 @@ public class CompanyAdvertisementParser {
         }
     }
 
-    private Advertisement getAdFromWebElement(WebElement webElement, AdOwner owner) {
+    private Advertisement getAdFromWebElement(WebElement webElement) {
         String url = webElement.getAttribute(HREF_ATTRIBUTE);
         Category category = Category.getCategoryFromUrl(url);
         if (category != null) {
@@ -118,7 +98,6 @@ public class CompanyAdvertisementParser {
             String price = adAttrs[1].replaceAll("\\D", EMPTY_STRING);
             Timestamp date = DateUtils.conertToTimestamp(adAttrs[2]);
             Advertisement advertisement = new Advertisement();
-            advertisement.setOwner(owner);
             advertisement.setCategory(category);
             advertisement.setUrl(url);
             advertisement.setName(name);
@@ -127,38 +106,5 @@ public class CompanyAdvertisementParser {
             return advertisement;
         }
         return null;
-    }
-
-    public static void main(String[] args) throws IOException, NoSuchMethodException, InterruptedException {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setJavascriptEnabled(true);
-        final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
-        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + "/phantomjs.exe");
-        WebDriver driver = new PhantomJSDriver(caps);
-        driver.get("https://www.avito.ru/user/f20b2dd57349fd96815bbdc7f581308b/profile?id=810817888&src=item");
-        WebElement e=driver.findElement(By.xpath("//div[@class=\"js-footer\"]"));
-        Coordinates cor=((Locatable)e).getCoordinates();
-        cor.inViewPort();
-        Thread.sleep(1000);
-
-        By by = By.xpath("//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a");
-//        By by = By.xpath("//div[@data-marker=\"profile-item(1501757134)\"]");
-        List<WebElement> elements = driver.findElements(by);
-        int size;
-        do {
-            size = elements.size();
-            cor.inViewPort();
-            Thread.sleep(1000);
-            elements = driver.findElements(by);
-        } while (size != elements.size());
-        for (WebElement we: elements) {
-            String p = we.getAttribute("href");
-            System.out.println(p);
-            String[] arr = we.getText().split("\n");
-            String pr = arr[1].replaceAll("\\D", "");
-            System.out.println(arr[0] + " " + pr);
-        }
-        System.out.println(elements.size() );
-        driver.quit();
     }
 }
