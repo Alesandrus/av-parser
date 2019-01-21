@@ -60,44 +60,21 @@ public class AdvertisementWatcher {
         this.adChecker = adChecker;
     }
 
-    @Scheduled(cron = "0 30 7-22 * * *")
-//    @Scheduled(fixedRate = 300000)
-    public void watchCompanies() {
-        LOGGER.info("Start scan companies");
-        Iterable<AdOwner> adOwners = adOwnerRepository.findAll();
-        Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
-        for (AdOwner adOwner : adOwners) {
-            List<Advertisement> updatedAds = new ArrayList<>();
-            if (adOwner.isActive() && adOwner.getOwnerType() == OwnerType.COMPANY) {
-                List<Advertisement> ads = companyAdvertisementParser.parsePageAndGetAds(adOwner);
-                updatedAds = adChecker.checkAds(ads);
-            }
-            if (!updatedAds.isEmpty()) {
-                Collections.sort(updatedAds);
-                adsForSending.put(adOwner, updatedAds);
-            }
-        }
-        if (!adsForSending.isEmpty()) {
-            String creationTime = DateUtils.getCurrentTime();
-            String pathToTemp = String.format("%scompany_report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
-            excelCreator.createReport(adsForSending, pathToTemp);
-            LOGGER.info("Report was created");
-            //advertisementSender.sendReport(pathToTemp, creationTime);
-            LOGGER.info("Email was sent");
-        }
-        LOGGER.info("Scanning companies was finished");
-    }
-
     @Scheduled(cron = "0 0 7-22 * * *")
-//    @Scheduled(fixedRate = 180000)
-    public void watchMarkets() {
-        LOGGER.info("Start scan markets");
+//    @Scheduled(fixedRate = 300000)
+    public void watchAds() {
+        LOGGER.info("Start scan ads");
         Iterable<AdOwner> adOwners = adOwnerRepository.findAll();
         Map<AdOwner, List<Advertisement>> adsForSending = new TreeMap<>();
         for (AdOwner adOwner : adOwners) {
             List<Advertisement> updatedAds = new ArrayList<>();
-            if (adOwner.isActive() && adOwner.getOwnerType() == OwnerType.MARKET) {
-                List<Advertisement> ads = marketAdvertisementParser.parsePageAndGetAds(adOwner);
+            if (adOwner.isActive()) {
+                List<Advertisement> ads;
+                if (adOwner.getOwnerType() == OwnerType.COMPANY) {
+                    ads = companyAdvertisementParser.parsePageAndGetAds(adOwner);
+                } else {
+                    ads = marketAdvertisementParser.parsePageAndGetAds(adOwner);
+                }
                 updatedAds = adChecker.checkAds(ads);
             }
             if (!updatedAds.isEmpty()) {
@@ -107,12 +84,12 @@ public class AdvertisementWatcher {
         }
         if (!adsForSending.isEmpty()) {
             String creationTime = DateUtils.getCurrentTime();
-            String pathToTemp = String.format("%smarket_report_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
+            String pathToTemp = String.format("%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
             LOGGER.info("Report was created");
             //advertisementSender.sendReport(pathToTemp, creationTime);
             LOGGER.info("Email was sent");
         }
-        LOGGER.info("Scanning markets was finished");
+        LOGGER.info("Scanning ads was finished");
     }
 }
