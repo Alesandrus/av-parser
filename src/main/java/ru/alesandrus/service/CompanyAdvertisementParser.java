@@ -18,6 +18,7 @@ import ru.alesandrus.models.enumerations.Category;
 import ru.alesandrus.repositories.AdvertisementRepository;
 import ru.alesandrus.utils.DateUtils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -29,9 +30,9 @@ import java.util.List;
  * @since 15.01.2019
  */
 @Component
-public class AdvertisementParser {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementParser.class);
-    private static final String avitoRoot = "https://www.avito.ru";
+public class CompanyAdvertisementParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CompanyAdvertisementParser.class);
+    private static final String AVITO_ROOT = "https://www.avito.ru";
     private static final String PHANTOMJS_ENV = "PHANTOMJS";
     private static final String SCROLL_DOWN_PATH = "//div[@class=\"js-footer\"]";
     private static final String ACTIVE_ADS_PATH = "//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a";
@@ -126,5 +127,38 @@ public class AdvertisementParser {
             return advertisement;
         }
         return null;
+    }
+
+    public static void main(String[] args) throws IOException, NoSuchMethodException, InterruptedException {
+        DesiredCapabilities caps = new DesiredCapabilities();
+        caps.setJavascriptEnabled(true);
+        final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
+        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + "/phantomjs.exe");
+        WebDriver driver = new PhantomJSDriver(caps);
+        driver.get("https://www.avito.ru/user/f20b2dd57349fd96815bbdc7f581308b/profile?id=810817888&src=item");
+        WebElement e=driver.findElement(By.xpath("//div[@class=\"js-footer\"]"));
+        Coordinates cor=((Locatable)e).getCoordinates();
+        cor.inViewPort();
+        Thread.sleep(1000);
+
+        By by = By.xpath("//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a");
+//        By by = By.xpath("//div[@data-marker=\"profile-item(1501757134)\"]");
+        List<WebElement> elements = driver.findElements(by);
+        int size;
+        do {
+            size = elements.size();
+            cor.inViewPort();
+            Thread.sleep(1000);
+            elements = driver.findElements(by);
+        } while (size != elements.size());
+        for (WebElement we: elements) {
+            String p = we.getAttribute("href");
+            System.out.println(p);
+            String[] arr = we.getText().split("\n");
+            String pr = arr[1].replaceAll("\\D", "");
+            System.out.println(arr[0] + " " + pr);
+        }
+        System.out.println(elements.size() );
+        driver.quit();
     }
 }

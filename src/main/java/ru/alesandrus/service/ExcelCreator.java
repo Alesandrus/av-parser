@@ -1,10 +1,7 @@
 package ru.alesandrus.service;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,7 +32,9 @@ public class ExcelCreator {
              FileOutputStream fileOut = new FileOutputStream(fileName)) {
             Sheet sheet = workbook.createSheet("Обновленные объявления");
             createTitle(sheet);
-            fillReport(updatedAds, sheet);
+            CellStyle cellStyle = getCellStyle(workbook);
+            fillReport(updatedAds, sheet, cellStyle);
+            autoSizeColumns(sheet, 6);
             workbook.write(fileOut);
         } catch (IOException e) {
             LOGGER.info(e.getMessage());
@@ -60,33 +59,47 @@ public class ExcelCreator {
         url.setCellValue("Ссылка на объявление");
     }
 
-    private void fillReport(Map<AdOwner, List<Advertisement>> updatedAds, Sheet sheet) {
+    private void fillReport(Map<AdOwner, List<Advertisement>> updatedAds, Sheet sheet, CellStyle cellStyle) {
         int rowNumber = 1;
         for (Map.Entry<AdOwner, List<Advertisement>> ownerAds : updatedAds.entrySet()) {
             String ownerName = ownerAds.getKey().getName();
             List<Advertisement> ads = ownerAds.getValue();
             for (Advertisement ad : ads) {
-                createRow(sheet, rowNumber, ownerName, ad);
+                createRow(sheet, rowNumber, ownerName, ad, cellStyle);
                 rowNumber++;
             }
         }
     }
 
-    private void createRow(Sheet sheet, int rowNumber, String ownerName, Advertisement ad) {
+    private void createRow(Sheet sheet, int rowNumber, String ownerName, Advertisement ad, CellStyle cellStyle) {
         Row row = sheet.createRow(rowNumber);
-        Cell number = row.createCell(0);
+        Cell number = row.createCell(0, CellType.NUMERIC);
         number.setCellValue(rowNumber);
-        Cell owner = row.createCell(1);
+        Cell owner = row.createCell(1, CellType.STRING);
         owner.setCellValue(ownerName);
-        Cell name = row.createCell(2);
+        Cell name = row.createCell(2, CellType.STRING);
         name.setCellValue(ad.getName());
-        Cell price = row.createCell(3);
-        price.setCellValue(ad.getPrice().toString());
-        Cell updatedTime = row.createCell(4);
+        Cell price = row.createCell(3, CellType.NUMERIC);
+        price.setCellValue(ad.getPrice().intValue());
+        Cell updatedTime = row.createCell(4, CellType.NUMERIC);
+        updatedTime.setCellStyle(cellStyle);
         updatedTime.setCellValue(ad.getLastUpdateTime());
-        Cell category = row.createCell(5);
+        Cell category = row.createCell(5, CellType.STRING);
         category.setCellValue(ad.getCategory().getName());
-        Cell url = row.createCell(6);
+        Cell url = row.createCell(6, CellType.STRING);
         url.setCellValue(ad.getUrl());
+    }
+
+    private void autoSizeColumns(Sheet sheet, int numberOfColumns) {
+        for (int i = 0; i <= numberOfColumns; i++) {
+            sheet.autoSizeColumn(i);
+        }
+    }
+
+    private CellStyle getCellStyle(Workbook wb) {
+        CellStyle cellStyle = wb.createCellStyle();
+        CreationHelper createHelper = wb.getCreationHelper();
+        cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy h:mm"));
+        return cellStyle;
     }
 }
