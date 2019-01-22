@@ -50,7 +50,7 @@ public class AdvertisementSender {
 
             // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO));
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
+//            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
 
             // Set Subject: header field
             message.setSubject(String.format("Отчет за %s", creationTime));
@@ -71,7 +71,7 @@ public class AdvertisementSender {
             messageBodyPart = new MimeBodyPart();
             DataSource source = new FileDataSource(filename);
             messageBodyPart.setDataHandler(new DataHandler(source));
-            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf(File.pathSeparator)) + 1);
+            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf(File.separatorChar) + 1));
             multipart.addBodyPart(messageBodyPart);
 
             // Send the complete message parts

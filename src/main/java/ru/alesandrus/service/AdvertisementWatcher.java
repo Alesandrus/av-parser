@@ -11,6 +11,7 @@ import ru.alesandrus.models.enumerations.OwnerType;
 import ru.alesandrus.repositories.AdOwnerRepository;
 import ru.alesandrus.utils.DateUtils;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -60,7 +61,7 @@ public class AdvertisementWatcher {
         this.adChecker = adChecker;
     }
 
-    @Scheduled(cron = "0 0 7-22 * * *")
+    @Scheduled(cron = "0 0 8-22 * * *")
 //    @Scheduled(fixedRate = 300000)
     public void watchAds() {
         LOGGER.info("Start scan ads");
@@ -84,7 +85,7 @@ public class AdvertisementWatcher {
         }
         if (!adsForSending.isEmpty()) {
             String creationTime = DateUtils.getCurrentTime();
-            String pathToTemp = String.format("%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
+            String pathToTemp = String.format("%s%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), File.separatorChar, creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
             LOGGER.info("Report was created");
             advertisementSender.sendReport(pathToTemp, creationTime);
