@@ -31,7 +31,7 @@ public class MarketAdvertisementParser {
     private static final String AVITO_ROOT = "https://www.avito.ru";
     private static final String PHANTOMJS_ENV = "phantomjs";
     private static final String HREF_ATTRIBUTE = "href";
-    private static final String PHANTOMJS_EXE = File.pathSeparator + "phantomjs.exe";
+    private static final String PHANTOMJS_EXE = File.separatorChar + "phantomjs.exe";
     private static final String EMPTY_STRING = "";
     private static final String MARKET_ADS_PATH = "//div[@class=\"catalog_table\"]/div/div/div[@class=\"description item_table-description\"]";
     private static final String NEXT_PAGE_PATH = "//div[@class=\"pagination-nav clearfix\"]/a[@class=\"pagination-page js-pagination-next\"]";
