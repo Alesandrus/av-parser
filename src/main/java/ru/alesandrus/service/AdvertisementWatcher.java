@@ -87,7 +87,7 @@ public class AdvertisementWatcher {
             String pathToTemp = String.format("%sreport_%s.xls", System.getProperty(JAVA_IO_TMPDIR), creationTime);
             excelCreator.createReport(adsForSending, pathToTemp);
             LOGGER.info("Report was created");
-            //advertisementSender.sendReport(pathToTemp, creationTime);
+            advertisementSender.sendReport(pathToTemp, creationTime);
             LOGGER.info("Email was sent");
         }
         LOGGER.info("Scanning ads was finished");

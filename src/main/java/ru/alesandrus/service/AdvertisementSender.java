@@ -13,6 +13,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.File;
 import java.util.Properties;
 
 /**
@@ -24,7 +25,8 @@ import java.util.Properties;
 public class AdvertisementSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementSender.class);
     private static final Properties properties;
-    private static final String SEND_TO = "raulon7@mail.ru";
+    private static final String SEND_TO = "velo-opt-bel@mail.ru";
+    private static final String SEND_TO_2 = "raulon7@mail.ru";
     private static final String AVITO_PARSER_MAIL = "scanavito@gmail.com";
     private static final String PASSWORD = "realparser";
 
@@ -47,7 +49,8 @@ public class AdvertisementSender {
             message.setFrom(new InternetAddress(AVITO_PARSER_MAIL));
 
             // Set To: header field of the header.
-            message.addRecipient(Message.RecipientType.TO,new InternetAddress(SEND_TO));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
 
             // Set Subject: header field
             message.setSubject(String.format("Отчет за %s", creationTime));
@@ -68,11 +71,11 @@ public class AdvertisementSender {
             messageBodyPart = new MimeBodyPart();
             DataSource source = new FileDataSource(filename);
             messageBodyPart.setDataHandler(new DataHandler(source));
-            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf("\\")) + 1);
+            messageBodyPart.setFileName(filename.substring(filename.lastIndexOf(File.pathSeparator)) + 1);
             multipart.addBodyPart(messageBodyPart);
 
             // Send the complete message parts
-            message.setContent(multipart );
+            message.setContent(multipart);
 
             // Send message
             Transport.send(message);

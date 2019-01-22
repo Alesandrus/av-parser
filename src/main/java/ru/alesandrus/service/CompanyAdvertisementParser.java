@@ -18,6 +18,7 @@ import ru.alesandrus.models.enumerations.Category;
 import ru.alesandrus.repositories.AdvertisementRepository;
 import ru.alesandrus.utils.DateUtils;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -32,11 +33,11 @@ import java.util.List;
 public class CompanyAdvertisementParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyAdvertisementParser.class);
     private static final String AVITO_ROOT = "https://www.avito.ru";
-    private static final String PHANTOMJS_ENV = "PHANTOMJS";
+    private static final String PHANTOMJS_ENV = "phantomjs";
     private static final String SCROLL_DOWN_PATH = "//div[@class=\"js-footer\"]";
     private static final String ACTIVE_ADS_PATH = "//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a";
     private static final String HREF_ATTRIBUTE = "href";
-    private static final String PHANTOMJS_EXE = "/phantomjs.exe";
+    private static final String PHANTOMJS_EXE = File.pathSeparator + "phantomjs.exe";
     private static final String EMPTY_STRING = "";
 
     public List<Advertisement> parsePageAndGetAds(AdOwner owner) {

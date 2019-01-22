@@ -14,6 +14,7 @@ import ru.alesandrus.models.Advertisement;
 import ru.alesandrus.models.enumerations.Category;
 import ru.alesandrus.utils.DateUtils;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,9 +29,9 @@ import java.util.List;
 public class MarketAdvertisementParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketAdvertisementParser.class);
     private static final String AVITO_ROOT = "https://www.avito.ru";
-    private static final String PHANTOMJS_ENV = "PHANTOMJS";
+    private static final String PHANTOMJS_ENV = "phantomjs";
     private static final String HREF_ATTRIBUTE = "href";
-    private static final String PHANTOMJS_EXE = "/phantomjs.exe";
+    private static final String PHANTOMJS_EXE = File.pathSeparator + "phantomjs.exe";
     private static final String EMPTY_STRING = "";
     private static final String MARKET_ADS_PATH = "//div[@class=\"catalog_table\"]/div/div/div[@class=\"description item_table-description\"]";
     private static final String NEXT_PAGE_PATH = "//div[@class=\"pagination-nav clearfix\"]/a[@class=\"pagination-page js-pagination-next\"]";
@@ -102,38 +103,4 @@ public class MarketAdvertisementParser {
         }
         return null;
     }
-
-    /*public static void main(String[] args) throws IOException, NoSuchMethodException, InterruptedException {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setJavascriptEnabled(true);
-        final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
-        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + "/phantomjs.exe");
-        WebDriver driver = new PhantomJSDriver(caps);
-        driver.get("https://www.avito.ru/begemotik/rossiya");
-        By by = By.xpath("//div[@class=\"catalog_table\"]/div/div/div[@class=\"description item_table-description\"]");
-        List<WebElement> paginations;
-        List<Advertisement> advertisements = new ArrayList<>();
-        do {
-            List<WebElement> elements = driver.findElements(by);
-            advertisements.addAll(transformToAds(elements));
-            paginations = driver.findElements(By.xpath("//div[@class=\"pagination-nav clearfix\"]/a[@class=\"pagination-page js-pagination-next\"]"));
-            if (!paginations.isEmpty()) {
-                String href = paginations.get(0).getAttribute("href");
-                Thread.sleep(500);
-                driver.get(href);
-            }
-        } while (!paginations.isEmpty());
-        *//*for (WebElement we: elements) {
-            String href = we.findElement(By.xpath(".//div/h3/a[@itemprop=\"url\"]")).getAttribute("href");
-            *//**//*String p = we.getAttribute("href");
-            System.out.println(p);
-            String[] arr = we.getText().split("\n");
-            String pr = arr[1].replaceAll("\\D", "");
-            System.out.println(arr[0] + " " + pr);*//**//*
-            System.out.println(we.getText());
-            System.out.println(href);
-        }*//*
-        System.out.println(advertisements.size());
-        driver.quit();
-    }*/
 }
