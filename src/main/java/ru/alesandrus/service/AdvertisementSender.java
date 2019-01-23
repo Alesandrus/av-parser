@@ -26,7 +26,8 @@ public class AdvertisementSender {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdvertisementSender.class);
     private static final Properties properties;
     private static final String SEND_TO = "velo-opt-bel@mail.ru";
-    private static final String SEND_TO_2 = "raulon7@mail.ru";
+    private static final String SEND_TO_2 = "777op00@mail.ru";
+    private static final String SEND_TO_3 = "raulon7@mail.ru";
     private static final String AVITO_PARSER_MAIL = "scanavito@gmail.com";
     private static final String PASSWORD = "realparser";
 
@@ -50,7 +51,7 @@ public class AdvertisementSender {
 
             // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO));
-//            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
 
             // Set Subject: header field
             message.setSubject(String.format("Отчет за %s", creationTime));
