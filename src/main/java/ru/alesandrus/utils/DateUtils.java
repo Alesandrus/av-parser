@@ -16,7 +16,7 @@ public class DateUtils {
 
     private static LocalDateTime getDate(String str) {
         LocalDateTime date;
-        String[] arr = str.split("\\s|:");
+        String[] arr = str.split("\\u00a0|\\s|:");
         if(str.contains("Сегодня")) {
             date = LocalDateTime.of(LocalDate.now(), LocalTime.of(Integer.parseInt(arr[1]), Integer.parseInt(arr[2])));
         } else if (str.contains("Вчера")) {

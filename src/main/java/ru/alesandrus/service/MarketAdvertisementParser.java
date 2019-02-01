@@ -36,6 +36,8 @@ public class MarketAdvertisementParser {
     private static final String MARKET_ADS_PATH = "//div[@class=\"catalog_table\"]/div/div/div[@class=\"description item_table-description\"]";
     private static final String NEXT_PAGE_PATH = "//div[@class=\"pagination-nav clearfix\"]/a[@class=\"pagination-page js-pagination-next\"]";
     private static final String AD_URL_PATH = ".//div/h3/a[@itemprop=\"url\"]";
+    private static final String TIME_PATH = ".//div[@class=\"data\"]/div[@class=\"js-item-date c-2\"]";
+    private static final String DATA_ABSOLUTE_DATE_ATTRIBUTE = "data-absolute-date";
 
     public List<Advertisement> parsePageAndGetAds(AdOwner owner) {
         DesiredCapabilities caps = new DesiredCapabilities();
@@ -86,13 +88,14 @@ public class MarketAdvertisementParser {
     private Advertisement transformToAd(WebElement element) {
         String[] text = element.getText().split("\n");
         String url = element.findElement(By.xpath(AD_URL_PATH)).getAttribute(HREF_ATTRIBUTE);
+        String time = element.findElement(By.xpath(TIME_PATH)).getAttribute(DATA_ABSOLUTE_DATE_ATTRIBUTE).trim();
         Category category = Category.getCategoryFromUrl(url);
         if (category != null) {
             Advertisement ad = new Advertisement();
             String name = text[0];
             String price = text[1].replaceAll("\\D", EMPTY_STRING);
             String city = text[2];
-            Timestamp date = DateUtils.conertToTimestamp(text[3]);
+            Timestamp date = DateUtils.conertToTimestamp(time);
             ad.setCategory(category);
             ad.setName(name);
             ad.setLastUpdateTime(date);
