@@ -3,9 +3,8 @@ package ru.alesandrus.service;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,7 +13,6 @@ import ru.alesandrus.models.Advertisement;
 import ru.alesandrus.models.enumerations.Category;
 import ru.alesandrus.utils.DateUtils;
 
-import java.io.File;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -29,9 +27,8 @@ import java.util.List;
 public class MarketAdvertisementParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketAdvertisementParser.class);
     private static final String AVITO_ROOT = "https://www.avito.ru";
-    private static final String PHANTOMJS_ENV = "PHANTOM_JS";
     private static final String HREF_ATTRIBUTE = "href";
-    private static final String PHANTOMJS_EXE = File.separatorChar + "phantomjs";
+    //TODO exe delete
     private static final String EMPTY_STRING = "";
     private static final String MARKET_ADS_PATH = "//div[@class=\"catalog_table\"]/div/div/div[@class=\"description item_table-description\"]";
     private static final String NEXT_PAGE_PATH = "//div[@class=\"pagination-nav clearfix\"]/a[@class=\"pagination-page js-pagination-next\"]";
@@ -40,12 +37,10 @@ public class MarketAdvertisementParser {
     private static final String DATA_ABSOLUTE_DATE_ATTRIBUTE = "data-absolute-date";
 
     public List<Advertisement> parsePageAndGetAds(AdOwner owner) {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setJavascriptEnabled(true);
-        final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
-        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + PHANTOMJS_EXE);
-        caps.setBrowserName("chrome");
-        WebDriver driver = new PhantomJSDriver(caps);
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--proxy-server=socks5://213.166.65.49:30028");
+        options.addArguments("--headless", "window-size=1024,768", "--no-sandbox");
+        WebDriver driver = new ChromeDriver(options);
         List<Advertisement> ads = getAds(driver, owner);
         driver.quit();
         return ads;

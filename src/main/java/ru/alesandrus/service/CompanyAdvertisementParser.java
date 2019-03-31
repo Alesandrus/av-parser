@@ -3,6 +3,8 @@ package ru.alesandrus.service;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.internal.Coordinates;
 import org.openqa.selenium.interactions.internal.Locatable;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
@@ -33,20 +35,19 @@ import java.util.List;
 public class CompanyAdvertisementParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyAdvertisementParser.class);
     private static final String AVITO_ROOT = "https://www.avito.ru";
-    private static final String PHANTOMJS_ENV = "PHANTOM_JS";
-    private static final String SCROLL_DOWN_PATH = "//div[@class=\"js-footer\"]";
+    private static final String PHANTOMJS_ENV = "PHANTOMJS";
+    private static final String SCROLL_DOWN_PATH = "//div[@class=\"js-footer-app\"]";
     private static final String ACTIVE_ADS_PATH = "//div[@data-marker=\"profile-item-box\"]/div[@itemprop=\"makesOffer\"]/a";
     private static final String HREF_ATTRIBUTE = "href";
+    //TODO exe delete
     private static final String PHANTOMJS_EXE = File.separatorChar + "phantomjs";
     private static final String EMPTY_STRING = "";
 
     public List<Advertisement> parsePageAndGetAds(AdOwner owner) {
-        DesiredCapabilities caps = new DesiredCapabilities();
-        caps.setJavascriptEnabled(true);
-        final String phantomjsPath = System.getenv(PHANTOMJS_ENV);
-        caps.setCapability(PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY, phantomjsPath + PHANTOMJS_EXE);
-        caps.setBrowserName("chrome");
-        WebDriver driver = new PhantomJSDriver(caps);
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--proxy-server=socks5://213.166.65.49:30028");
+        options.addArguments("--headless", "window-size=1024,768", "--no-sandbox");
+        WebDriver driver = new ChromeDriver(options);
         List<WebElement> webElements = getWebElements(owner.getUrl(), driver);
         List<Advertisement> updatedAds = getAds(webElements, owner);
         driver.quit();

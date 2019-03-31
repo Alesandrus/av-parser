@@ -6,3 +6,5 @@ INSERT INTO ad_owner (owner_id, name, url, owner_type, active) VALUES (5, 'LORAK
 INSERT INTO ad_owner (owner_id, name, url, owner_type, active) VALUES (6, 'БЕГЕМОТиК', 'https://www.avito.ru/begemotik', 'MARKET', true);
 INSERT INTO ad_owner (owner_id, name, url, owner_type, active) VALUES (7, 'Игрушки Дисконт', 'https://www.avito.ru/i146479673', 'MARKET', true);
 INSERT INTO ad_owner (owner_id, name, url, owner_type, active) VALUES (8, 'SportBelgorod', 'https://www.avito.ru/user/7ff9d32b61530a9cb284f1ad2e041fa7/profile?id=1126553475&src=item', 'COMPANY', true);
+DROP TABLE advertisement;
+DELETE FROM advertisement;

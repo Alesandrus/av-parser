@@ -52,6 +52,7 @@ public class AdvertisementSender {
             // Set To: header field of the header.
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_2));
+            //message.addRecipient(Message.RecipientType.TO, new InternetAddress(SEND_TO_3));
 
             // Set Subject: header field
             message.setSubject(String.format("Отчет за %s", creationTime));
