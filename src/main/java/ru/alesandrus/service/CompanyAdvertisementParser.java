@@ -103,7 +103,11 @@ public class CompanyAdvertisementParser {
             advertisement.setCategory(category);
             advertisement.setUrl(url);
             advertisement.setName(name);
-            advertisement.setPrice(new BigInteger(price));
+            if (!price.isEmpty()) {
+                advertisement.setPrice(new BigInteger(price));
+            } else {
+                advertisement.setPrice(new BigInteger("0"));
+            }
             advertisement.setLastUpdateTime(date);
             return advertisement;
         }

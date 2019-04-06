@@ -94,7 +94,11 @@ public class MarketAdvertisementParser {
             ad.setCategory(category);
             ad.setName(name);
             ad.setLastUpdateTime(date);
-            ad.setPrice(new BigInteger(price));
+            if (!price.isEmpty()) {
+                ad.setPrice(new BigInteger(price));
+            } else {
+                ad.setPrice(new BigInteger("0"));
+            }
             ad.setCity(city);
             ad.setUrl(url);
             return ad;
